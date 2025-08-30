@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studymate - PDF Summarizer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">STUDYMATE 🚀</a>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="summarizer.html">Summarizer</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="summarizer container">
+            <h2>PDF Summarizer</h2>
+            <p>Upload a PDF document to get a concise summary.</p>
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="file-upload-box">
+                    <label for="pdf-file" class="file-label">Choose a PDF File</label>
+                    <input type="file" id="pdf-file" name="pdfFile" accept=".pdf" required>
+                    <span id="file-name">No file chosen</span>
+                </div>
+                <button type="submit" class="cta-button">Summarize</button>
+            </form>
+            <div id="summary-result">
+                <h3>Summary</h3>
+                <p id="summary-text">Your summary will appear here...</p>
+            </div>
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p>Summarizing, please wait...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Studymate. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const fileInput = document.getElementById('pdf-file');
+        const fileNameSpan = document.getElementById('file-name');
+        const summaryText = document.getElementById('summary-text');
+        const loadingDiv = document.getElementById('loading');
+        const summaryResultDiv = document.getElementById('summary-result');
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileNameSpan.textContent = fileInput.files[0].name;
+            } else {
+                fileNameSpan.textContent = 'No file chosen';
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('pdfFile', fileInput.files[0]);
+
+            loadingDiv.classList.remove('hidden');
+            summaryResultDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/upload-pdf', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server error occurred.');
+                }
+
+                const data = await response.json();
+                summaryText.textContent = data.summary;
+                summaryResultDiv.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error:', error);
+                summaryText.textContent = 'Failed to generate summary. Please try again.';
+                summaryResultDiv.style.display = 'block';
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
+        });
+    </script>
+
+</body>
+</html>
